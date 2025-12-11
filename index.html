@@ -91,32 +91,33 @@
     </center>
   </div>
   <div id="downloadContainer"></div>
-  <script> 
+  <script>
     url = ""
+    roms = []
     downloadurl = "https://epicminer256.github.io/ps3isodl/"
-    
+
     contentElement = document.getElementById('downloadContainer')
-    
+
     function updateStatus(color, text, page){
       document.getElementById('statusbar').style.backgroundColor = color
       document.getElementById('statusbar').textContent = text
       document.title = text+" - "+page
       return
     }
-    
-    
-    function genLinks(searchterm){
+
+
+    function genLinks(callback){
       xhr = new XMLHttpRequest()
-      xhr.open("GET", downloadurl+"?search="+searchterm, false)
+      xhr.open("GET", downloadurl+"roms.txt", false)
       xhr.send()
       if(xhr.status === 200) {
-        return xhr.responseText.split('\n');
+        callback(xhr.responseText.split('\n'));
       }else{
         updateStatus("red", "Network Error", "Error")
       }
     }
     function genLocalLinks(){
-      updateStatus("orange", "Requesting list of ISOs...", "Renderer")
+      updateStatus("grey", "Rendering list of ISOs...", "Renderer")
       if(document.getElementById("search").value == false){
         if(confirm("Are you sure you don't want to enter a search term? This may lag the browser.") == false){
           alert("Canceled")
@@ -124,7 +125,14 @@
           return
         }
       }
-      links = genLinks(document.getElementById("search").value)
+      links = []
+      for(r in roms){
+        label = decodeURI(roms[r].split('/').pop()).replace(".iso", "").split("%26").join("&").split("%2C").join(",")
+        if(label.includes(document.getElementById("search").value)){
+                console.log(roms[r])
+                links.push(roms[r])
+        }
+      }
       contentElement.innerHTML = ''
       updateStatus("orange", "Rendering list...", "Renderer")
       for(l in links){
@@ -170,12 +178,12 @@
       }
       updateStatus("green", "Idle", "Results")
     }
-    
+
     function goHome(){
-    
+
       contentElement.innerHTML = '\
         <center>\
-        <h1>WebmanMod DL (outdated)</h1>\
+        <h1>WebmanMod DL (early build)</h1>\
         <p id="gamecount">Loading...</p>\
         <input id="search" type="text" placeholder="Search"\>\
         <br>\
@@ -214,27 +222,24 @@
         <p>Downloading in the background is only supported when downloading to the HHD due to PS3 limitations.</p>\
       </center>\
       '
-      
-      
+
+
       ipelement = document.getElementById('psip')
       // if(typeof localStorage.getItem("psip") == "string"){
       //   ipelement.value = localStorage.getItem("psip")
       // }
-      
+
       updateStatus("orange", "Getting game count...", "Renderer")
-      xhr = new XMLHttpRequest()
-      xhr.open("GET", downloadurl+"count/", false)
-      xhr.send(null)
-      
-      if (xhr.status === 200) {
-        document.getElementById('gamecount').textContent = "Serving "+xhr.responseText+" Playstation 3 ISO links";
+
+
+      genLinks((links) => {
+        roms = links
+        document.getElementById('gamecount').textContent = "Serving "+roms.length+" Playstation 3 ISO links";
         updateStatus("green", "Idle", "Home")
-      }else{
-        updateStatus("red", "Network Error", "Error")
-      }
+        })
     }
     goHome()
-    
+
   </script>
 </body>
 

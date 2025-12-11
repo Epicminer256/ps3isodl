@@ -163,20 +163,22 @@
           return
         }
       }
-      links = genLinks(document.getElementById("search").value)
-      contentElement.innerHTML = ''
-      updateStatus("orange", "Rendering list...", "Renderer")
-      for(l in links){
-        label = decodeURI(links[l].split('/').pop()).replace(".iso", "").split("%26").join("&").split("%2C").join(",")
-        a = document.createElement('a')
-        a.textContent = label
-        a.setAttribute("target", "_blank")
-        a.href = "http://"+psip+"/download.ps3?to="+path+"&url="+links[l]
-        contentElement.appendChild(a)
-        b = document.createElement('br')
-        contentElement.appendChild(b)
-      }
-      updateStatus("green", "Idle", "Results")
+      genLinks((links) => {
+        contentElement.innerHTML = ''
+        updateStatus("orange", "Rendering list...", "Renderer")
+        for(l in links){
+          label = decodeURI(links[l].split('/').pop()).replace(".iso", "").split("%26").join("&").split("%2C").join(",")
+          a = document.createElement('a')
+          a.textContent = label
+          a.setAttribute("target", "_blank")
+          a.href = "http://"+psip+"/download.ps3?to="+path+"&url="+links[l]
+          contentElement.appendChild(a)
+          b = document.createElement('br')
+          contentElement.appendChild(b)
+        }
+        updateStatus("green", "Idle", "Results")
+      })
+
     }
 
     function goHome(){

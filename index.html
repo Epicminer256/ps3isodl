@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Webman DL</title>
+  <style>
+    html, body {
+      height: 100%;
+      width: 100%;
+      font-family: arial;
+      padding: 0;
+      margin: 0;
+    }
+    html, input, button{
+      font-size: 20px;
+    }
+    #downloadContainer{
+      background-color: #dedede;
+      margin: 0 10px;
+      padding: 5px;
+    }
+    @media only screen and (min-width: 600px) {
+      .split-2{
+        column-count: 2;
+      }
+      #downloadContainer {
+        margin: 0 10%;
+        padding: 1% 5%;
+      }
+    }
+    @media only screen and (min-width: 1300px) {
+      .split-3{
+        column-count: 3;
+      }
+    }
+    #homebutton{
+      width: 100%;
+    }
+    #statusbar{
+      width: 100%;
+      background-color: orange;
+      height: 30px;
+      color: white;
+      text-align: center;
+      margin: 0;
+    }
+    #topbar{
+      position: sticky;
+      top: 0;
+      width: 100%;
+    }
+    .card {
+      background-color: #c2c2c2;
+      border-radius: 5px;
+      padding: 15px;
+      margin: 25px 0;
+    }
+    #psip{
+      width: 100%;
+    }
+    #search{
+      width: 80%;
+    }
+    button{
+      padding: 6px;
+    }
+    button:hover{
+      background-color: rgb(70,70,70);
+    }
+    button:focus{
+      background-color: rgb(70,70,70);
+    }
+    input:hover{
+      color: white;
+      background-color: rgb(70,70,70);
+    }
+    input:focus{
+      color: white;
+      background-color: rgb(70,70,70);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="topbar">
+    <div id="statusbar">Waiting for JS...</div>
+    <center>
+      <button onclick="goHome()" id="homebutton">Go Home</button>
+    </center>
+  </div>
+  <div id="downloadContainer"></div>
+  <script> 
+    url = ""
+    downloadurl = "https://ps3iso.cdntools.repl.co/"
+    
+    contentElement = document.getElementById('downloadContainer')
+    
+    function updateStatus(color, text, page){
+      document.getElementById('statusbar').style.backgroundColor = color
+      document.getElementById('statusbar').textContent = text
+      document.title = text+" - "+page
+      return
+    }
+    
+    
+    function genLinks(searchterm){
+      xhr = new XMLHttpRequest()
+      xhr.open("GET", downloadurl+"?search="+searchterm, false)
+      xhr.send()
+      if(xhr.status === 200) {
+        return xhr.responseText.split('\n');
+      }else{
+        updateStatus("red", "Network Error", "Error")
+      }
+    }
+    function genLocalLinks(){
+      updateStatus("orange", "Requesting list of ISOs...", "Renderer")
+      if(document.getElementById("search").value == false){
+        if(confirm("Are you sure you don't want to enter a search term? This may lag the browser.") == false){
+          alert("Canceled")
+          updateStatus("green", "Idle", "Home")
+          return
+        }
+      }
+      links = genLinks(document.getElementById("search").value)
+      contentElement.innerHTML = ''
+      updateStatus("orange", "Rendering list...", "Renderer")
+      for(l in links){
+        label = decodeURI(links[l].split('/').pop()).replace(".iso", "").split("%26").join("&").split("%2C").join(",")
+        a = document.createElement('a')
+        a.textContent = label
+        a.setAttribute("target", "_blank")
+        a.href = links[l]
+        contentElement.appendChild(a)
+        b = document.createElement('br')
+        contentElement.appendChild(b)
+      }
+      updateStatus("green", "Idle", "Results")
+    }
+    function genPSLinks(path){
+      if(document.getElementById("psip").value == ""){
+        updateStatus("red", "No IP Given", "Error")
+        alert("You need to list the PS3's IP in order to download to it")
+        updateStatus("green", "Idle", "Home")
+        return
+      }
+      updateStatus("orange", "Requesting list of ISOs...", "Renderer")
+      psip = document.getElementById("psip").value
+      if(document.getElementById("search").value == false){
+        if(confirm("Are you sure you don't want to enter a search term? This may lag the browser.") == false){
+          alert("Canceled")
+          updateStatus("green", "Idle", "Home")
+          return
+        }
+      }
+      links = genLinks(document.getElementById("search").value)
+      contentElement.innerHTML = ''
+      updateStatus("orange", "Rendering list...", "Renderer")
+      for(l in links){
+        label = decodeURI(links[l].split('/').pop()).replace(".iso", "").split("%26").join("&").split("%2C").join(",")
+        a = document.createElement('a')
+        a.textContent = label
+        a.setAttribute("target", "_blank")
+        a.href = "http://"+psip+"/download.ps3?to="+path+"&url="+links[l]
+        contentElement.appendChild(a)
+        b = document.createElement('br')
+        contentElement.appendChild(b)
+      }
+      updateStatus("green", "Idle", "Results")
+    }
+    
+    function goHome(){
+    
+      contentElement.innerHTML = '\
+        <center>\
+        <h1>WebmanMod DL (outdated)</h1>\
+        <p id="gamecount">Loading...</p>\
+        <input id="search" type="text" placeholder="Search"\>\
+        <br>\
+        <hr>\
+        <div class="split-2">\
+          <div class="card">\
+            Download to this machine\
+            <br>\
+            <button onclick="genLocalLinks()">\
+              <img alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAJdJREFUOE/tk+ENgjAQhT8mESYpbgKToJMgkwiTKJNgnjkTUjnPxPDP+9Mm7ft6d+9a8GMUgf4E3IGLd+8bgLQCbcYfALv0oAFKs077lwtXYMgt9TLogRk42JoMdMy9FOAGVBsmC1JbNiPwJpZWgAW/F4IoWmeOlggQ/ZQnQM2ZPs27Q1F5SQB1vLN6oxfX5/pk52gOQuADyREczbwPin4AAAAASUVORK5CYII=" />\
+            </button>\
+          </div>\
+          <div class="card">\
+            Remotely download on PS3\
+            <br>\
+            <input id="psip" type="text" placeholder="Playstation IP"\>\
+            <br>\
+            <button onclick="genPSLinks(\'/dev_hdd0/PS3ISO/\')">\
+              <img alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAANlJREFUOE+dk9ENwjAMBa+bwCYwCTAJMAkwSWES2AR0VQxuVKWAfxol6fn52en4xAo4AYu0N7V8ADvg6mGXbvTAMQ4aEBN4d1kDngWoCjNMRZzF3ZGC92YpYw9sASUrV3WujSZAiffyw6HABG2AdYE0Acq8AeeqhgxpAsw+GFTMCtezeU1A9kKYAKXbZt23c02AlyzB+o2YC0017NCsiUIuJbue6IcKvjLRLCHXdbQxz8bsHFi70u2/WeuYBSg7S/4J8Pcoh3H1ANXZVWZHhtLya4wDv60YPecXsr9KEQa7QokAAAAASUVORK5CYII=" />\
+            </button>\
+            <button onclick="genPSLinks(\'/dev_usb000/PS3ISO/\')">\
+              <img alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAFpJREFUOE9jZMAN/qNJPWBgYFBEV85IwACQPMggZBpFCyEDCFpIUwMasHgPQwyXC9ADEGYWRkCSagDIIBQ9owagBQhStOGKhZEUiPcZGBgUsCTlAwwMDI7I4gDtThURBBXYhwAAAABJRU5ErkJggg==" />\
+              #0\
+            </button>\
+            <button onclick="genPSLinks(\'/dev_usb001/PS3ISO/\')">\
+              <img alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAFpJREFUOE9jZMAN/qNJPWBgYFBEV85IwACQPMggZBpFCyEDCFpIUwMasHgPQwyXC9ADEGYWRkCSagDIIBQ9owagBQhStOGKhZEUiPcZGBgUsCTlAwwMDI7I4gDtThURBBXYhwAAAABJRU5ErkJggg==" />\
+              #1\
+            </button>\
+          </div>\
+        </div>\
+        \
+        <p>Thanks both <a href="http://redump.org/">http://redump.org/ (http only)</a> and <a href="https://archive.org/details/@cvlt_of_mirrors">CVLT OF MIRRORS at archive.org</a></p>\
+        <hr>\
+        <p>Tired of not being able to install PKGi games to your USB? This site allows you to remotely download games directly to you PS3</p>\
+        <p>If you remotely download the file to your PS3, it will save under your PS3ISO folder.</p>\
+        <p>Downloading in the background is only supported when downloading to the HHD due to PS3 limitations.</p>\
+      </center>\
+      '
+      
+      
+      ipelement = document.getElementById('psip')
+      // if(typeof localStorage.getItem("psip") == "string"){
+      //   ipelement.value = localStorage.getItem("psip")
+      // }
+      
+      updateStatus("orange", "Getting game count...", "Renderer")
+      xhr = new XMLHttpRequest()
+      xhr.open("GET", downloadurl+"count/", false)
+      xhr.send(null)
+      
+      if (xhr.status === 200) {
+        document.getElementById('gamecount').textContent = "Serving "+xhr.responseText+" Playstation 3 ISO links";
+        updateStatus("green", "Idle", "Home")
+      }else{
+        updateStatus("red", "Network Error", "Error")
+      }
+    }
+    goHome()
+    
+  </script>
+</body>
+
+</html>

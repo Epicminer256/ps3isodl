@@ -1,7 +1,7 @@
 import AOList
 import os
-from flask import Flask, request
-from flask_cors import CORS, cross_origin
+# from flask import Flask, request
+# from flask_cors import CORS, cross_origin
 import urllib.parse
 
 urls = open("list.txt").read().split("\n")
@@ -18,24 +18,24 @@ if not os.path.exists("roms.txt"):
 else:
   downloadurls = open("roms.txt", "r").read().split("\n")
 
-app = Flask(__name__)
-CORS(app, support_credentials=True)
-
-@app.route('/')
-def index():
-  finalhtml = ""
-  search = request.args.get('search')
-  for url in downloadurls:
-    if search is not None:
-      if search.lower() in urllib.parse.unquote(url).lower():
-        finalhtml = finalhtml+url+"\n"
-    else:
-      finalhtml = finalhtml+url+"\n"
-  return finalhtml
-
-@app.route('/count/')
-def count():
-  return str(len(downloadurls))
-
-
-app.run(host='0.0.0.0', port=81)
+# app = Flask(__name__)
+# CORS(app, support_credentials=True)
+#
+# @app.route('/')
+# def index():
+#   finalhtml = ""
+#   search = request.args.get('search')
+#   for url in downloadurls:
+#     if search is not None:
+#       if search.lower() in urllib.parse.unquote(url).lower():
+#         finalhtml = finalhtml+url+"\n"
+#     else:
+#       finalhtml = finalhtml+url+"\n"
+#   return finalhtml
+#
+# @app.route('/count/')
+# def count():
+#   return str(len(downloadurls))
+#
+#
+# app.run(host='0.0.0.0', port=81)
